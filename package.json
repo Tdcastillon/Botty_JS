@@ -9,5 +9,20 @@
   },
   "devDependencies": {
     "typescript": "^4.6.2"
-  }
+  },
+  "name": "discord_bot_js",
+  "description": "Bot in DiscordJS",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tdcastillon/New_Bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tdcastillon/New_Bot/issues"
+  },
+  "homepage": "https://github.com/Tdcastillon/New_Bot#readme"
 }
