@@ -1,12 +1,17 @@
 {
   "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/opus": "github:discordjs/opus",
+    "@discordjs/rest": "^0.3.0",
+    "discord-api-types": "^0.28.0",
+    "discord-player": "^5.2.2",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
+    "fs": "^0.0.1-security",
     "ts-node": "^10.7.0"
   },
   "scripts": {
-    "tsc": "tsc -w --skipLibCheck",
-    "start": "ts-node index.ts"
+    "start": "node index.js"
   },
   "devDependencies": {
     "typescript": "^4.6.2"
@@ -29,5 +34,5 @@
   "engines": {
     "node": "16.x",
     "npm": "7.x"
- }
+  }
 }
