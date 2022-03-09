@@ -24,8 +24,8 @@
     "type": "git",
     "url": "git+https://github.com/Tdcastillon/New_Bot.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["Discord", "Music"],
+  "author": "Heairo",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Tdcastillon/New_Bot/issues"
