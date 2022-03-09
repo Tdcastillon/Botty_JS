@@ -1,84 +1,163 @@
 const { REST } = require("@discordjs/rest");
-const { Routes } = require("discord-api-types/v9");
+const { Routes, InteractionResponseType } = require("discord-api-types/v9");
 const Discord = require("discord.js")
 const { Client, Intents } = require("discord.js");
-const client = new Discord.Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
-const { Player } = require("discord-player");
-const dotenv =require('dotenv')
+const { Player, Queue, Track } = require("discord-player");
+const dotenv =require('dotenv');
+const { pause } = require("./slash/pause.js");
+const { resume } = require("./slash/resume.js");
+const { infos } = require("./slash/info.js");
+const { skip } = require("./slash/skip.js");
+const { queue } = require("./slash/queue.js");
+const { help } = require("./slash/help.js");
+
+const play = require("./slash/play.js").play
+const add = require("./slash/add.js").add
+const quit = require("./slash/quit.js").quit
 
 dotenv.config()
 
-const commands = [{
-    name: "play",
-    description: "Plays a song!",
-    options: [
-        {
-            name: "query",
-            type: "STRING",
-            description: "The song you want to play",
-            required: true
-        }
-    ]
-}]; 
+const allIntents =
+[
+    Discord.Intents.FLAGS.DIRECT_MESSAGES,
+    Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+    Discord.Intents.FLAGS.GUILDS,
+    Discord.Intents.FLAGS.GUILD_MESSAGES,
+    Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    Discord.Intents.FLAGS.GUILD_VOICE_STATES
+]
 
-const rest = new REST({ version: "9" }).setToken(process.env.TOKEN);
-
-(async () => {
-  try {
-    console.log("Started refreshing application [/] commands.");
-
-    await rest.put(
-      Routes.applicationGuildCommands("950709714507927654", "950720745464549376"),
-      { body: commands },
-    );
-
-    console.log("Successfully reloaded application [/] commands.");
-  } catch (error) {
-    console.error(error);
-  }
-})();
+const client = new Discord.Client({ intents: allIntents });
 
 const player = new Player(client);
 
 // add the trackStart event so when a song will be played this message will be sent
-player.on("trackStart", (queue, track) => queue.metadata.channel.send(`🎶 | Now playing **${track.title}**!`))
+player.on("trackStart", (queue, track) => {
+    let channelId = queue.metadata.channel.channelId
+    let channel = queue.metadata.channel.guild.channels.cache.get(channelId)
+    console.log(track)
+    channel.send(`:musical_note::musical_note: Playing **${track.title}** !`)
+})
 
 client.once("ready", () => {
     console.log("I'm ready !");
+    const guildId = '893071149913767936'
+    const guild = client.guilds.cache.get(guildId);
+
+    let commands;
+
+    if (guild) {
+        commands = guild.commands
+    } else {
+        commands = client.application?.commands
+    }
+
+    commands?.create(
+        {
+            name: 'play',
+            description: 'play a song',
+            options: [
+                {
+                    name: "query",
+                    description: "youtube song's url",
+                    required: true,
+                    type: "STRING"
+                }
+            ]
+        }
+    )
+    commands?.create(
+        {
+            name: 'add',
+            description: 'add track to the playlist',
+            options: [
+                {
+                    name: "query",
+                    description: "youtube song's url",
+                    required: true,
+                    type: "STRING"
+                }
+            ]
+        }
+    )
+    commands?.create(
+        {
+            name: 'quit',
+            description: 'make the bot quit the vocal channel',
+        }
+    )
+    commands?.create(
+        {
+            name: 'pause',
+            description: 'set pause to the music'
+        }
+    )
+    commands?.create(
+        {
+            name: 'pause',
+            description: 'set pause to the music'
+        }
+    )
+    commands?.create(
+        {
+            name: 'resume',
+            description: 'set play to the music'
+        }
+    )
+    commands?.create(
+        {
+            name: 'info',
+            description: 'info of the current music'
+        }
+    )
+    commands?.create(
+        {
+            name: 'skip',
+            description: 'skip to next music'
+        }
+    )
+    commands?.create(
+        {
+            name: 'queue',
+            description: 'list of next music'
+        }
+    )
+    commands?.help(
+        {
+            name: 'help',
+            description: 'get a helper for the bot'
+        }
+    )
 });
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) return;
-
-    // /play track:Despacito
-    // will play "Despacito" in the voice channel
     if (interaction.commandName === "play") {
-        if (!interaction.member.voice.channelId) return await interaction.reply({ content: "You are not in a voice channel!", ephemeral: true });
-        if (interaction.guild.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.me.voice.channelId) return await interaction.reply({ content: "You are not in my voice channel!", ephemeral: true });
-        const query = interaction.options.get("query").value;
-        const queue = player.createQueue(interaction.guild, {
-            metadata: {
-                channel: interaction.channel
-            }
-        });
-        
-        // verify vc connection
-        try {
-            if (!queue.connection) await queue.connect(interaction.member.voice.channel);
-        } catch {
-            queue.destroy();
-            return await interaction.reply({ content: "Could not join your voice channel!", ephemeral: true });
-        }
-
-        await interaction.deferReply();
-        const track = await player.search(query, {
-            requestedBy: interaction.user
-        }).then(x => x.tracks[0]);
-        if (!track) return await interaction.followUp({ content: `❌ | Track **${query}** not found!` });
-
-        queue.play(track);
-
-        return await interaction.followUp({ content: `⏱️ | Loading track **${track.title}**!` });
+        play(player, interaction)
+    }
+    if (interaction.commandName === "add") {
+        add(player, interaction)
+    }
+    if (interaction.commandName === "quit") {
+        quit(player, interaction)
+    }
+    if (interaction.commandName === 'pause') {
+        pause(player, interaction)
+    }
+    if (interaction.commandName === 'resume') {
+        resume(player, interaction)
+    }
+    if (interaction.commandName === 'info') {
+        infos(player, interaction)
+    }
+    if (interaction.commandName === 'skip') {
+        skip(player, interaction)
+    }
+    if (interaction.commandName === 'queue') {
+        queue(player, interaction)
+    }
+    if (interaction.commandName === 'help') {
+        help(player, interaction)
     }
 });
 
