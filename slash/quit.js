@@ -8,7 +8,7 @@ async function quit(player, interaction)
     queue.destroy()
     await interaction.deferReply();
 
-    interaction.reply("Bye !")
+    interaction.channel.send("Bye !")
     return await interaction.followUp({ content: `quitting ...` });
 }
 

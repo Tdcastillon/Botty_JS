@@ -7,7 +7,7 @@ async function infos(player, interaction)
         return await interaction.reply("There are no songs in the queue")
     }
 
-    let actual_track = queue.previousTracks[0]
+    let actual_track = queue.current
 
     let embed = new MessageEmbed()
     .setDescription(`Time music = ${actual_track.duration}`)

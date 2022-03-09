@@ -17,6 +17,8 @@ const quit = require("./slash/quit.js").quit
 
 dotenv.config()
 
+let prefix = "!"
+
 const allIntents =
 [
     Discord.Intents.FLAGS.DIRECT_MESSAGES,
@@ -35,7 +37,6 @@ const player = new Player(client);
 player.on("trackStart", (queue, track) => {
     let channelId = queue.metadata.channel.channelId
     let channel = queue.metadata.channel.guild.channels.cache.get(channelId)
-    console.log(track)
     channel.send(`:musical_note::musical_note: Playing **${track.title}** !`)
 })
 
@@ -122,7 +123,7 @@ client.once("ready", () => {
             description: 'list of next music'
         }
     )
-    commands?.help(
+    commands?.create(
         {
             name: 'help',
             description: 'get a helper for the bot'
@@ -160,5 +161,17 @@ client.on("interactionCreate", async (interaction) => {
         help(player, interaction)
     }
 });
+
+client.on("messageCreate", msg => {
+    if (msg.content.toLowerCase() == prefix + "clearchat") {
+        async function clear() {
+            msg.delete();
+            const fetched = await msg.channel.messages.fetch({limit: 99});
+            msg.channel.bulkDelete(fetched);
+        }
+        clear();
+    }
+});
+
 
 client.login(process.env.TOKEN);

@@ -9,13 +9,14 @@ async function skip(player, interaction)
     
     const currentSong = queue.current
 
+    console.log(queue.tracks)
     queue.skip()
 
     await interaction.deferReply();
 
     await interaction.channel.send({
         embeds: [
-            new MessageEmbed().setDescription(`${currentSong.title} has been skipped!`).setThumbnail(currentSong.thumbnail)
+            new MessageEmbed().setDescription(`${currentSong.title} has been skipped!`)
         ]
     })
 
